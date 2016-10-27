@@ -7,9 +7,9 @@
 #     4. Shuffle bitext for SGD
 #     5. Build source and target dictionaries
 
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
     echo ""
-    echo "Usage: $0 src trg path_to_data path_to_subword"
+    echo "Usage: $0 src trg path_to_data path_to_subword path_to_src"
     echo ""
     exit 1
 fi
@@ -23,28 +23,33 @@ S=$1
 # target language (example: en)
 T=$2
 
-# path to dl4mt/data
+# path to dl4mt/data data files
 P1=$3
 
 # path to subword NMT scripts (can be downloaded from https://github.com/rsennrich/subword-nmt)
 P2=$4
 
+# path to dl4mt/data sources
+P3=$5
+
 
 # merge all parallel corpora
 ./merge.sh $1 $2 $3
 
-# tokenize training and validation data
-perl $P1/tokenizer.perl -threads 5 -l $S < ${P1}/all_${S}-${T}.${S} > ${P1}/all_${S}-${T}.${S}.tok
-perl $P1/tokenizer.perl -threads 5 -l $T < ${P1}/all_${S}-${T}.${T} > ${P1}/all_${S}-${T}.${T}.tok
-perl $P1/tokenizer.perl -threads 5 -l $S < ${P1}/test2011/newstest2011.${S} > ${P1}/newstest2011.${S}.tok
-perl $P1/tokenizer.perl -threads 5 -l $T < ${P1}/test2011/newstest2011.${T} > ${P1}/newstest2011.${T}.tok
+# tokenize training, validation and test data
+perl $P3/tokenizer.perl -threads 5 -l $S < ${P1}/all_${S}-${T}.${S} > ${P1}/all_${S}-${T}.${S}.tok
+perl $P3/tokenizer.perl -threads 5 -l $T < ${P1}/all_${S}-${T}.${T} > ${P1}/all_${S}-${T}.${T}.tok
+perl $P3/tokenizer.perl -threads 5 -l $S < ${P1}/test2011/newstest2011.${S} > ${P1}/newstest2011.${S}.tok
+perl $P3/tokenizer.perl -threads 5 -l $T < ${P1}/test2011/newstest2011.${T} > ${P1}/newstest2011.${T}.tok
+perl $P3/tokenizer.perl -threads 5 -l $S < ${P1}/test/newstest2013.${S} > ${P1}/newstest2013.${S}.tok
+perl $P3/tokenizer.perl -threads 5 -l $T < ${P1}/test/newstest2013.${T} > ${P1}/newstest2013.${T}.tok
 
 # BPE
 if [ ! -f "${S}.bpe" ]; then
-    python $P2/learn_bpe.py -s 20000 < all_${S}-${T}.${S}.tok > ${S}.bpe
+    python $P2/learn_bpe.py -s 20000 < ${P1}/all_${S}-${T}.${S}.tok > ${P1}/${S}.bpe
 fi
 if [ ! -f "${T}.bpe" ]; then
-    python $P2/learn_bpe.py -s 20000 < all_${S}-${T}.${T}.tok > ${T}.bpe
+    python $P2/learn_bpe.py -s 20000 < ${P1}/all_${S}-${T}.${T}.tok > ${P1}/${T}.bpe
 fi
 
 # utility function to encode a file with bpe
@@ -56,16 +61,18 @@ encode () {
     fi
 }
 
-# apply bpe to training data
-encode ${S}.bpe ${P1}/all_${S}-${T}.${S}.tok ${P1}/all_${S}-${T}.${S}.tok.bpe
-encode ${T}.bpe ${P1}/all_${S}-${T}.${T}.tok ${P1}/all_${S}-${T}.${T}.tok.bpe
-encode ${S}.bpe ${P1}/newstest2011.${S}.tok ${P1}/newstest2011.${S}.tok.bpe
-encode ${T}.bpe ${P1}/newstest2011.${T}.tok ${P1}/newstest2011.${T}.tok.bpe
+# apply bpe to data
+encode ${P1}/${S}.bpe ${P1}/all_${S}-${T}.${S}.tok ${P1}/all_${S}-${T}.${S}.tok.bpe
+encode ${P1}/${T}.bpe ${P1}/all_${S}-${T}.${T}.tok ${P1}/all_${S}-${T}.${T}.tok.bpe
+encode ${P1}/${S}.bpe ${P1}/newstest2011.${S}.tok ${P1}/newstest2011.${S}.tok.bpe
+encode ${P1}/${T}.bpe ${P1}/newstest2011.${T}.tok ${P1}/newstest2011.${T}.tok.bpe
+encode ${P1}/${S}.bpe ${P1}/newstest2013.${S}.tok ${P1}/newstest2013.${S}.tok.bpe
+encode ${P1}/${T}.bpe ${P1}/newstest2013.${T}.tok ${P1}/newstest2013.${T}.tok.bpe
 
-# shuffle 
-python $P1/shuffle.py all_${S}-${T}.${S}.tok.bpe all_${S}-${T}.${T}.tok.bpe
+# shuffle training data
+python $P3/shuffle.py ${P1}/all_${S}-${T}.${S}.tok.bpe ${P1}/all_${S}-${T}.${T}.tok.bpe
 
 # build dictionary
-python $P1/build_dictionary.py all_${S}-${T}.${S}.tok.bpe
-python $P1/build_dictionary.py all_${S}-${T}.${T}.tok.bpe
+python $P3/build_dictionary.py ${P1}/all_${S}-${T}.${S}.tok.bpe
+python $P3/build_dictionary.py ${P1}/all_${S}-${T}.${T}.tok.bpe
 

@@ -20,10 +20,10 @@ done
 
 
 # code directory for cloned repositories
-CODE_DIR=${HOME}/git/dl4mt-tutorial
+CODE_DIR=${HOME}/codes/dl4mt-tutorial
 
 # code repository 
-CODE_CENTRAL=https://github.com/kyunghyuncho/dl4mt-tutorial
+CODE_CENTRAL=https://github.com/yjchoe/dl4mt-tutorial
 
 # our input files will reside here
 DATA_DIR=${CODE_DIR}/data
@@ -41,9 +41,11 @@ fi
 
 # download the europarl v7 and validation sets and extract
 python ${CODE_DIR}/data/download_files.py \
-    -s='fr' -t='en' \
-    --source-dev=newstest2011.fr \
-    --target-dev=newstest2011.en \
+    -s='en' -t='fr' \
+    --source-dev=newstest2011.en \
+    --target-dev=newstest2011.fr \
+    --source-test=newstest2013.en \
+    --target-test=newstest2013.fr \
     --outdir=${DATA_DIR}
 
 if [ "$BPE" = true ] ; then
@@ -59,15 +61,17 @@ if [ "$BPE" = true ] ; then
     fi
 
     # follow the preprocessing pipeline for BPE
-    ./preprocess.sh 'fr' 'en' ${DATA_DIR} ${BPE_DIR}
+    ./preprocess.sh 'fr' 'en' ${DATA_DIR} ${BPE_DIR} ${CODE_DIR}/data
 
 else
 
     # tokenize corresponding files
-    perl ${CODE_DIR}/data/tokenizer.perl -l 'fr' < ${DATA_DIR}/test2011/newstest2011.fr > ${DATA_DIR}/newstest2011.fr.tok
-    perl ${CODE_DIR}/data/tokenizer.perl -l 'en' < ${DATA_DIR}/test2011/newstest2011.en > ${DATA_DIR}/newstest2011.en.tok
-    perl ${CODE_DIR}/data/tokenizer.perl -l 'fr' < ${DATA_DIR}/europarl-v7.fr-en.fr > ${DATA_DIR}/europarl-v7.fr-en.fr.tok
-    perl ${CODE_DIR}/data/tokenizer.perl -l 'en' < ${DATA_DIR}/europarl-v7.fr-en.en > ${DATA_DIR}/europarl-v7.fr-en.en.tok
+    perl ${CODE_DIR}/data/tokenizer.perl -threads 5 -l 'fr' < ${DATA_DIR}/test2011/newstest2011.fr > ${DATA_DIR}/newstest2011.fr.tok
+    perl ${CODE_DIR}/data/tokenizer.perl -threads 5 -l 'en' < ${DATA_DIR}/test2011/newstest2011.en > ${DATA_DIR}/newstest2011.en.tok
+    perl ${CODE_DIR}/data/tokenizer.perl -threads 5 -l 'fr' < ${DATA_DIR}/test/newstest2013.fr > ${DATA_DIR}/newstest2013.fr.tok
+    perl ${CODE_DIR}/data/tokenizer.perl -threads 5 -l 'en' < ${DATA_DIR}/test/newstest2013.en > ${DATA_DIR}/newstest2013.en.tok
+    perl ${CODE_DIR}/data/tokenizer.perl -threads 5 -l 'fr' < ${DATA_DIR}/europarl-v7.fr-en.fr > ${DATA_DIR}/europarl-v7.fr-en.fr.tok
+    perl ${CODE_DIR}/data/tokenizer.perl -threads 5 -l 'en' < ${DATA_DIR}/europarl-v7.fr-en.en > ${DATA_DIR}/europarl-v7.fr-en.en.tok
 
     # extract dictionaries
     python ${CODE_DIR}/data/build_dictionary.py ${DATA_DIR}/europarl-v7.fr-en.fr.tok

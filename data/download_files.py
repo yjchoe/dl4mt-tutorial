@@ -8,6 +8,7 @@ import urllib2
 
 TRAIN_DATA_URL = 'http://www.statmt.org/europarl/v7/fr-en.tgz'
 VALID_DATA_URL = 'http://matrix.statmt.org/test_sets/newstest2011.tgz'
+TEST_DATA_URL  = 'http://matrix.statmt.org/test_sets/newstest2013.tgz'
 
 parser = argparse.ArgumentParser(
     description="""
@@ -19,10 +20,14 @@ parser.add_argument("-s", "--source", type=str, help="Source language",
                     default="fr")
 parser.add_argument("-t", "--target", type=str, help="Target language",
                     default="en")
-parser.add_argument("--source-dev", type=str, default="newstest2011.fr",
+parser.add_argument("--source-dev", type=str, default="newstest2011.en",
                     help="Source language dev filename")
-parser.add_argument("--target-dev", type=str, default="newstest2011.en",
+parser.add_argument("--target-dev", type=str, default="newstest2011.fr",
                     help="Target language dev filename")
+parser.add_argument("--source-test", type=str, default="newstest2013.en",
+                    help="Source language test filename")
+parser.add_argument("--target-test", type=str, default="newstest2013.fr",
+                    help="Target language test filename")
 parser.add_argument("--outdir", type=str, default=".",
                     help="Output directory")
 
@@ -86,6 +91,7 @@ def extract_tar_file_to(file_to_extract, extract_into, names_to_look):
 def main():
     train_data_file = os.path.join(args.outdir, 'train_data.tgz')
     valid_data_file = os.path.join(args.outdir, 'valid_data.tgz')
+    test_data_file  = os.path.join(args.outdir, 'test_data.tgz')
 
     # Download europarl v7 and extract it
     download_and_write_file(TRAIN_DATA_URL, train_data_file)
@@ -98,6 +104,12 @@ def main():
     extract_tar_file_to(
         valid_data_file, os.path.dirname(valid_data_file),
         [args.source_dev, args.target_dev])
+
+    # Download test set and extract it
+    download_and_write_file(TEST_DATA_URL, test_data_file)
+    extract_tar_file_to(
+        test_data_file, os.path.dirname(test_data_file),
+        [args.source_test, args.target_test])
 
 
 if __name__ == "__main__":
