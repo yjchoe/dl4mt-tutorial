@@ -17,9 +17,9 @@ indicators. Adapted from,
 https://github.com/orhanf/blocks-examples/tree/master/machine_translation
 """, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("-s", "--source", type=str, help="Source language",
-                    default="fr")
-parser.add_argument("-t", "--target", type=str, help="Target language",
                     default="en")
+parser.add_argument("-t", "--target", type=str, help="Target language",
+                    default="fr")
 parser.add_argument("--source-dev", type=str, default="newstest2011.en",
                     help="Source language dev filename")
 parser.add_argument("--target-dev", type=str, default="newstest2011.fr",
@@ -97,7 +97,7 @@ def main():
     download_and_write_file(TRAIN_DATA_URL, train_data_file)
     extract_tar_file_to(
         train_data_file, os.path.dirname(train_data_file),
-        ["{}-{}".format(args.source, args.target)])
+        ["{}-{}".format(args.source, args.target), "{}-{}".format(args.target, args.source)])
 
     # Download development set and extract it
     download_and_write_file(VALID_DATA_URL, valid_data_file)

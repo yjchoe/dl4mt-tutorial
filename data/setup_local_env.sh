@@ -20,7 +20,7 @@ done
 
 
 # code directory for cloned repositories
-CODE_DIR=${HOME}/codes/dl4mt-tutorial
+CODE_DIR=./dl4mt-tutorial
 
 # code repository 
 CODE_CENTRAL=https://github.com/yjchoe/dl4mt-tutorial
@@ -29,7 +29,7 @@ CODE_CENTRAL=https://github.com/yjchoe/dl4mt-tutorial
 DATA_DIR=${CODE_DIR}/data
 
 # our trained models will be saved here
-MODELS_DIR=${HOME}/models
+MODELS_DIR=./models
 
 
 # clone the repository from github into code directory
@@ -61,7 +61,7 @@ if [ "$BPE" = true ] ; then
     fi
 
     # follow the preprocessing pipeline for BPE
-    ./preprocess.sh 'fr' 'en' ${DATA_DIR} ${BPE_DIR} ${CODE_DIR}/data
+    ./preprocess.sh 'en' 'fr' ${DATA_DIR} ${BPE_DIR} ${CODE_DIR}/data
 
 else
 
