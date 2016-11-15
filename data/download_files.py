@@ -6,7 +6,7 @@ import os
 import tarfile
 import urllib2
 
-TRAIN_DATA_URL = 'http://www.statmt.org/europarl/v7/fr-en.tgz'
+TRAIN_DATA_URL = 'http://www.statmt.org/europarl/v7'
 VALID_DATA_URL = 'http://matrix.statmt.org/test_sets/newstest2011.tgz'
 TEST_DATA_URL  = 'http://matrix.statmt.org/test_sets/newstest2013.tgz'
 
@@ -94,7 +94,7 @@ def main():
     test_data_file  = os.path.join(args.outdir, 'test_data.tgz')
 
     # Download europarl v7 and extract it
-    download_and_write_file(TRAIN_DATA_URL, train_data_file)
+    download_and_write_file('{}/{}-{}.tgz'.format(TRAIN_DATA_URL, args.target, args.source), train_data_file)
     extract_tar_file_to(
         train_data_file, os.path.dirname(train_data_file),
         ["{}-{}".format(args.source, args.target), "{}-{}".format(args.target, args.source)])
